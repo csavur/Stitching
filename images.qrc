@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/camera.png</file>
+        <file>images/move.png</file>
+    </qresource>
+</RCC>
