@@ -2,16 +2,21 @@
 
 #include <QRectF>
 #include <QStyleOptionGraphicsItem>
+#include <QApplication>
+#include <qmath.h>
+#include "scene.h"
 
-#include<QDebug>
+#include <QDebug>
 
 GraphicsCameraItem::GraphicsCameraItem(QString name) : m_name(name)
 {
-    setFlag(QGraphicsItem::ItemIsMovable);
+    setFlags(QGraphicsItem::ItemIsSelectable |
+             QGraphicsItem::ItemIsMovable |
+             QGraphicsItem::ItemSendsGeometryChanges);
 
     setToolTip(m_name);
 
-    setColor(Qt::blue);
+    setColor(Qt::lightGray);
 }
 
 QRectF GraphicsCameraItem::boundingRect() const
@@ -35,14 +40,21 @@ void GraphicsCameraItem::paint(QPainter *painter, const QStyleOptionGraphicsItem
 
     painter->drawRect(tRect);
 
-    pen.setColor(Qt::cyan);
+    pen.setColor(Qt::black);
     painter->setPen(pen);
 
     QFontMetrics fm = painter->fontMetrics();
     int sWidth = fm.width(m_name);
 
     qreal bZone = 10.0;
-    painter->drawText((option->rect.width()-bZone)/2 - sWidth/2, 15, m_name);
+    painter->drawText((option->rect.width()-bZone)/2 - sWidth/2, rect().bottom() - 5, m_name);
+
+    QPointF p = rect().center();
+    p -= QPointF(18, 18);
+
+    painter->drawPixmap(p.x(), 0, QPixmap(":images/camera.png").scaled(36, 36, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    painter->drawPixmap(p, QPixmap(":images/move.png").scaled(36, 36, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
 }
 
 QColor GraphicsCameraItem::color() const
@@ -64,26 +76,33 @@ QRectF GraphicsCameraItem::rect() const
 }
 
 void GraphicsCameraItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-{
-    QList<QGraphicsItem *> list = collidingItems();
+{    
+//    QList<QGraphicsItem *> list = collidingItems();
 
-    if(list.size() != 0) {
-        foreach(QGraphicsItem * item , list)
-        {
-            GraphicsCameraItem * camera= static_cast<GraphicsCameraItem *>(item);
-            if (camera) {
-                camera->setColor(Qt::red);
-                camera->update();
-            }
-        }
-
-        setColor(Qt::red);
-
-    } else {
-        setColor(Qt::blue);
-    }
-
-    qDebug() << "dragging";
+//    for (int i = 0; i < list.size(); ++i) {
+//        QRectF rect = list[i]->boundingRect();
+//        this->setPos(rect.topRight());
+//        this->update();
+//        return;
+//    }
 
     QGraphicsItem::mouseMoveEvent(event);
+}
+
+QVariant GraphicsCameraItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value)
+{
+    if (change == ItemPositionChange && scene()) {
+           QPointF newPos = value.toPointF();
+           if(QApplication::mouseButtons() == Qt::LeftButton && qobject_cast<Scene*> (scene())){
+               Scene* customScene = qobject_cast<Scene*> (scene());
+               int gridSize = customScene->getGridSize();
+               qreal xV = round(newPos.x()/gridSize)*gridSize;
+               qreal yV = round(newPos.y()/gridSize)*gridSize;
+               return QPointF(xV, yV);
+           }
+           else
+               return newPos;
+       }
+       else
+           return QGraphicsItem::itemChange(change, value);
 }

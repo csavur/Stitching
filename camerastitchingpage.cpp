@@ -9,19 +9,33 @@ CameraStitchingPage::CameraStitchingPage(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    m_scene = new QGraphicsScene();
+    m_scene = new Scene(this);
 
     ui->graphicsView->setScene(m_scene);
 
     m_scene->setSceneRect(ui->widget->rect());
 
-    m_cameras << "video0" << "video1" << "video2" << "video3";
+    // Temprorary
+    QStringList m_cameras0;
+    m_cameras0 << "video0" << "video1";
 
-
-    for (int i = 0; i < m_cameras.size(); ++i) {
-
-        GraphicsCameraItem *camera = new GraphicsCameraItem(m_cameras.at(i));
+    for (int i = 0; i < m_cameras0.size(); ++i) {
+        GraphicsCameraItem *camera = new GraphicsCameraItem(m_cameras0.at(i));
         m_scene->addItem(camera);
+
+        camera->moveBy(150*i, 0);
+
+        m_rect.append(camera);
+    }
+
+    QStringList m_cameras1;
+    m_cameras1 << "video2" << "video3";
+
+    for (int i = 0; i < m_cameras1.size(); ++i) {
+        GraphicsCameraItem *camera = new GraphicsCameraItem(m_cameras1.at(i));
+        m_scene->addItem(camera);
+
+        camera->moveBy(150*i, 100*i + 200);
         m_rect.append(camera);
     }
 

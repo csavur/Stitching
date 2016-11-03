@@ -2,7 +2,7 @@
 #define CAMERASTITCHINGPAGE_H
 
 #include <QWidget>
-#include <QGraphicsScene>
+#include "scene.h"
 #include "graphicscameraitem.h"
 
 namespace Ui {
@@ -20,10 +20,8 @@ public:
 private:
     Ui::CameraStitchingPage *ui;
 
-    // Temprorary
-    QStringList m_cameras;
 
-    QGraphicsScene *m_scene;
+    Scene *m_scene;
 
     QList<GraphicsCameraItem *> m_rect;
 };

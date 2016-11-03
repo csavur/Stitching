@@ -19,6 +19,7 @@ public:
     QRectF rect() const;
 
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+    QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 
 private:
     QString m_name;

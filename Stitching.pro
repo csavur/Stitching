@@ -14,9 +14,14 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         camerastitchingpage.cpp \
-    graphicscameraitem.cpp
+    graphicscameraitem.cpp \
+    scene.cpp
 
 HEADERS  += camerastitchingpage.h \
-    graphicscameraitem.h
+    graphicscameraitem.h \
+    scene.h
 
 FORMS    += camerastitchingpage.ui
+
+RESOURCES += \
+    images.qrc
