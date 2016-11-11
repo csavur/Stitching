@@ -17,6 +17,9 @@ public:
     explicit CameraStitchingPage(QWidget *parent = 0);
     ~CameraStitchingPage();
 
+private slots:
+    void on_pushButtonAddCamera_clicked();
+
 private:
     Ui::CameraStitchingPage *ui;
 

@@ -18,14 +18,14 @@ public:
 
     QRectF rect() const;
 
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+
+    void mousePressEvent(QGraphicsSceneMouseEvent *event);
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 
 private:
     QString m_name;
-    QColor m_color;
-
-    //QRectF m_rect
 };
 
 #endif // GRAPHICSCAMERAITEM_H
