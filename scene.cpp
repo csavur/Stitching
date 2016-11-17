@@ -27,6 +27,4 @@ void Scene::drawBackground(QPainter *painter, const QRectF &rect)
         }
     }
     painter->drawPoints(points.data(), points.size());
-
-//    QGraphicsScene::drawBackground(painter, rect);
 }

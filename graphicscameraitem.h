@@ -8,13 +8,12 @@
 class GraphicsCameraItem : public QGraphicsItem
 {
 public:
+    enum BOX_SIDE { LEFT, RIGHT, UPPER, LOWER };
+
     GraphicsCameraItem(QString name);
 
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-
-    QColor color() const;
-    void setColor(const QColor &color);
 
     QRectF rect() const;
 
@@ -23,6 +22,9 @@ public:
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+
+    GraphicsCameraItem::BOX_SIDE closestSide(const QPointF &p, const QRectF &rect);
+    qreal distance(const QPointF &p, const QLineF &l);
 
 private:
     QString m_name;

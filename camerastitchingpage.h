@@ -23,7 +23,6 @@ private slots:
 private:
     Ui::CameraStitchingPage *ui;
 
-
     Scene *m_scene;
 
     QList<GraphicsCameraItem *> m_rect;
