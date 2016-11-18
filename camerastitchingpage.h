@@ -19,13 +19,14 @@ public:
 
 private slots:
     void on_pushButtonAddCamera_clicked();
+    void on_pushButtonGroup_clicked();
 
 private:
     Ui::CameraStitchingPage *ui;
 
     Scene *m_scene;
 
-    QList<GraphicsCameraItem *> m_rect;
+    QList<GraphicsCameraItem *> m_cams;
 };
 
 #endif // CAMERASTITCHINGPAGE_H

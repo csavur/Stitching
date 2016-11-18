@@ -13,28 +13,8 @@
   <property name="windowTitle">
    <string>CameraStitchingPage</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_3" rowstretch="0,0,0" columnstretch="2,10">
-   <item row="0" column="0">
-    <widget class="QPushButton" name="pushButtonAddCamera">
-     <property name="text">
-      <string>Add Camera</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1">
-    <spacer name="horizontalSpacer_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="1" column="0" colspan="2">
+  <layout class="QGridLayout" name="gridLayout_3" rowstretch="0,0,0" columnstretch="2,2,10">
+   <item row="1" column="0" colspan="3">
     <widget class="QWidget" name="widget" native="true">
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0">
@@ -43,7 +23,7 @@
      </layout>
     </widget>
    </item>
-   <item row="2" column="0" colspan="2">
+   <item row="2" column="0" colspan="3">
     <widget class="QWidget" name="widgetControl" native="true">
      <layout class="QGridLayout" name="gridLayout">
       <property name="leftMargin">
@@ -79,6 +59,33 @@
        </widget>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QPushButton" name="pushButtonAddCamera">
+     <property name="text">
+      <string>Add Camera</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2">
+    <spacer name="horizontalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="0" column="1">
+    <widget class="QPushButton" name="pushButtonGroup">
+     <property name="text">
+      <string>Find Groups</string>
+     </property>
     </widget>
    </item>
   </layout>

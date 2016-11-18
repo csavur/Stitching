@@ -13,7 +13,7 @@
 static const double Pi = 3.14159265358979323846264338327950288419717;
 static double TwoPi = 2.0 * Pi;
 
-#define CAM_SIZE (150)
+#define CAM_SIZE (140)
 
 GraphicsCameraItem::GraphicsCameraItem(QString name) : m_name(name)
 {
@@ -58,14 +58,14 @@ void GraphicsCameraItem::paint(QPainter *painter, const QStyleOptionGraphicsItem
     QPointF p = rect().center();
     p -= QPointF(18, 18);
 
-    painter->drawPixmap(p.x(), 0, QPixmap(":images/camera.png").scaled(36, 36, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    painter->drawPixmap(p.x(), -16, QPixmap(":images/camera.png").scaled(36, 36, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     painter->drawPixmap(p, QPixmap(":images/move.png").scaled(36, 36, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
 }
 
 QRectF GraphicsCameraItem::rect() const
 {
-    qreal bZone = 20.0;
+    qreal bZone = 5.0;
     QRectF rect = boundingRect();
     rect -= QMarginsF(bZone, bZone, bZone, bZone);
     return rect;
@@ -73,26 +73,26 @@ QRectF GraphicsCameraItem::rect() const
 
 QVariant GraphicsCameraItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value)
 {
-//        if (change == ItemPositionChange && scene()) {
+    //        if (change == ItemPositionChange && scene()) {
 
-//            QPointF newPos = value.toPointF();
+    //            QPointF newPos = value.toPointF();
 
-//            if(QApplication::mouseButtons() == Qt::LeftButton && qobject_cast<Scene*> (scene())){
+    //            if(QApplication::mouseButtons() == Qt::LeftButton && qobject_cast<Scene*> (scene())){
 
-//                Scene* customScene = qobject_cast<Scene*> (scene());
-//                int gridSize = customScene->getGridSize();
+    //                Scene* customScene = qobject_cast<Scene*> (scene());
+    //                int gridSize = customScene->getGridSize();
 
-//                qreal xV = round(newPos.x()/gridSize)*gridSize;
-//                qreal yV = round(newPos.y()/gridSize)*gridSize;
+    //                qreal xV = round(newPos.x()/gridSize)*gridSize;
+    //                qreal yV = round(newPos.y()/gridSize)*gridSize;
 
-//                return QPointF(xV, yV);
-//            }
-//            else {
-//                return newPos;
-//            }
-//        }
-//        else
-//            return QGraphicsItem::itemChange(change, value);
+    //                return QPointF(xV, yV);
+    //            }
+    //            else {
+    //                return newPos;
+    //            }
+    //        }
+    //        else
+    //            return QGraphicsItem::itemChange(change, value);
 
 
     return QGraphicsItem::itemChange(change, value);
@@ -106,31 +106,44 @@ void GraphicsCameraItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void GraphicsCameraItem::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 {
-    const int minDistanceX = 40;
-    const int minDistanceY = 60;
+    const int minDistanceX = 10;
+    const int minDistanceY = 10;
 
     //QPointF p = pos();
     QGraphicsItem::mouseMoveEvent(e);
     QPointF p_new = pos();
 
-    QList<QGraphicsItem*> col_it = collidingItems(Qt::IntersectsItemBoundingRect);
+    QList<QGraphicsItem*> cItems = collidingItems(Qt::IntersectsItemBoundingRect);
 
-    if(col_it.size() > 0) {
+    QGraphicsItem *closestItem;
+    if(cItems.size() > 0) {
+        qreal x_min = cItems[0]->pos().x() - boundingRect().width();
+        qreal x_max = cItems[0]->pos().x() + cItems[0]->boundingRect().width();
+        qreal y_min = cItems[0]->pos().y() - boundingRect().height();
+        qreal y_max = cItems[0]->pos().y() + cItems[0]->boundingRect().height();
 
-        qreal x_min = col_it[0]->pos().x() - boundingRect().width();
-        qreal x_max = col_it[0]->pos().x() + col_it[0]->boundingRect().width();
-        qreal y_min = col_it[0]->pos().y() - boundingRect().height();
-        qreal y_max = col_it[0]->pos().y() + col_it[0]->boundingRect().height();
+        closestItem = cItems[0];
 
-        for (int i = 1; i < col_it.size(); ++i) {
-            if(col_it[i]->pos().x() - boundingRect().width() < x_min)
-                x_min = col_it[i]->pos().x() - boundingRect().width();
-            if(col_it[i]->pos().x() + col_it[i]->boundingRect().width() > x_max)
-                x_max = col_it[i]->pos().x() + col_it[i]->boundingRect().width();
-            if(col_it[i]->pos().y() - boundingRect().height() < y_min)
-                y_min = col_it[i]->pos().y() - boundingRect().height();
-            if(col_it[i]->pos().y() + col_it[i]->boundingRect().height() > y_max)
-                y_max = col_it[i]->pos().y() + col_it[i]->boundingRect().height();
+        for (int i = 1; i < cItems.size(); ++i) {
+            bool assigned = false;
+            if(cItems[i]->pos().x() - boundingRect().width() < x_min) {
+                x_min = cItems[i]->pos().x() - boundingRect().width();
+                assigned = true;
+            }
+            if(cItems[i]->pos().x() + cItems[i]->boundingRect().width() > x_max) {
+                x_max = cItems[i]->pos().x() + cItems[i]->boundingRect().width();
+                assigned = true;
+            }
+            if(cItems[i]->pos().y() - boundingRect().height() < y_min) {
+                y_min = cItems[i]->pos().y() - boundingRect().height();
+                assigned = true;
+            }
+            if(cItems[i]->pos().y() + cItems[i]->boundingRect().height() > y_max) {
+                y_max = cItems[i]->pos().y() + cItems[i]->boundingRect().height();
+                assigned = true;
+            }
+            if(assigned)
+                closestItem = cItems[i];
         }
 
         QRectF rect(QPointF(x_min, y_min), QPointF(x_max, y_max));
@@ -138,9 +151,11 @@ void GraphicsCameraItem::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
         switch(closestSide(p_new, rect)) {
         case LEFT:
             p_new.setX(x_min + minDistanceX);
+            p_new.setY((y_max + y_min)/2 );
             break;
         case RIGHT:
             p_new.setX(x_max - minDistanceX);
+            p_new.setY((y_max + y_min)/2 );
             break;
         case UPPER:
             p_new.setY(y_min - minDistanceY);
@@ -150,6 +165,10 @@ void GraphicsCameraItem::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
             break;
         }
         setPos(p_new);
+
+        addStitchedItem(closestItem);
+        GraphicsCameraItem *temp = static_cast<GraphicsCameraItem *>(closestItem);
+        temp->addStitchedItem(this);
     }
 }
 
@@ -181,6 +200,16 @@ void GraphicsCameraItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     setOpacity(1);
     QGraphicsItem::mouseReleaseEvent(event);
+
+    QList<QGraphicsItem*> items = collidingItems(Qt::IntersectsItemBoundingRect);
+
+    if(items.size() == 0) {
+        foreach (QGraphicsItem *item0, m_stitched) {
+            GraphicsCameraItem *item = static_cast<GraphicsCameraItem *>(item0);
+            item->removeFromStitchedItem(this);
+        }
+        m_stitched.clear();
+    }
 }
 
 GraphicsCameraItem::BOX_SIDE GraphicsCameraItem::closestSide(const QPointF &p, const QRectF &rect)
@@ -235,8 +264,30 @@ qreal GraphicsCameraItem::distance(const QPointF &p, const QLineF &l)
     // if line is a point, return distance between point and one line node
     qreal norm = sqrt(x2*x2 + y2*y2);
     if (norm <= std::numeric_limits<int>::epsilon())
-      return sqrt(x*x + y*y);
+        return sqrt(x*x + y*y);
 
     // distance
     return fabs(x*y2 - y*x2) / norm;
+}
+
+QString GraphicsCameraItem::name() const
+{
+    return m_name;
+}
+
+QList<QGraphicsItem *> GraphicsCameraItem::stitched() const
+{
+    return m_stitched;
+}
+
+void GraphicsCameraItem::addStitchedItem(QGraphicsItem *item)
+{
+    if(!m_stitched.contains(item)) {
+        m_stitched.append(item);
+    }
+}
+
+void GraphicsCameraItem::removeFromStitchedItem(QGraphicsItem *item)
+{
+    m_stitched.removeOne(item);
 }

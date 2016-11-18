@@ -26,8 +26,16 @@ public:
     GraphicsCameraItem::BOX_SIDE closestSide(const QPointF &p, const QRectF &rect);
     qreal distance(const QPointF &p, const QLineF &l);
 
+    QString name() const;
+
+    QList<QGraphicsItem *> stitched() const;
+    void addStitchedItem(QGraphicsItem *item);
+    void removeFromStitchedItem(QGraphicsItem *item);
+
 private:
     QString m_name;
+
+    QList<QGraphicsItem *> m_stitched;
 };
 
 #endif // GRAPHICSCAMERAITEM_H
