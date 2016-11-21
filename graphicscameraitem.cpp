@@ -10,8 +10,12 @@
 
 #include <QDebug>
 
-static const double Pi = 3.14159265358979323846264338327950288419717;
-static double TwoPi = 2.0 * Pi;
+
+QList<GraphicsCameraItem *> GraphicsCameraItem::m_allVideos;
+FunctionPtr GraphicsCameraItem::m_callbackFuncPtr = NULL;
+void * GraphicsCameraItem::m_callbackObjPtr = NULL;
+
+static const double Pi = 3.1415926;
 
 #define CAM_SIZE (140)
 
@@ -22,6 +26,8 @@ GraphicsCameraItem::GraphicsCameraItem(QString name) : m_name(name)
              QGraphicsItem::ItemSendsGeometryChanges);
 
     setToolTip(m_name);
+
+    m_allVideos.append(this);
 }
 
 QRectF GraphicsCameraItem::boundingRect() const
@@ -50,6 +56,15 @@ void GraphicsCameraItem::paint(QPainter *painter, const QStyleOptionGraphicsItem
     QFontMetrics fm = painter->fontMetrics();
     int sWidth = fm.width(m_name);
 
+//    // temp
+//    QString temp;
+//    for (int i = 0; i < m_stitched.size(); ++i) {
+//        GraphicsCameraItem *item = static_cast<GraphicsCameraItem *>(m_stitched[i]);
+//        temp.append(item->name());
+//    }
+//    painter->drawText((option->rect.width())/2 - sWidth/2, rect().top() + 25, temp);
+//    // end temp
+
     qreal bZone = 0;
     painter->drawText((option->rect.width()-bZone)/2 - sWidth/2, rect().bottom() - 5, m_name);
 
@@ -71,33 +86,6 @@ QRectF GraphicsCameraItem::rect() const
     return rect;
 }
 
-QVariant GraphicsCameraItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value)
-{
-    //        if (change == ItemPositionChange && scene()) {
-
-    //            QPointF newPos = value.toPointF();
-
-    //            if(QApplication::mouseButtons() == Qt::LeftButton && qobject_cast<Scene*> (scene())){
-
-    //                Scene* customScene = qobject_cast<Scene*> (scene());
-    //                int gridSize = customScene->getGridSize();
-
-    //                qreal xV = round(newPos.x()/gridSize)*gridSize;
-    //                qreal yV = round(newPos.y()/gridSize)*gridSize;
-
-    //                return QPointF(xV, yV);
-    //            }
-    //            else {
-    //                return newPos;
-    //            }
-    //        }
-    //        else
-    //            return QGraphicsItem::itemChange(change, value);
-
-
-    return QGraphicsItem::itemChange(change, value);
-}
-
 void GraphicsCameraItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     setOpacity(0.7);
@@ -109,42 +97,59 @@ void GraphicsCameraItem::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
     const int minDistanceX = 10;
     const int minDistanceY = 10;
 
-    //QPointF p = pos();
+    QPointF p = pos();
     QGraphicsItem::mouseMoveEvent(e);
     QPointF p_new = pos();
 
     QList<QGraphicsItem*> cItems = collidingItems(Qt::IntersectsItemBoundingRect);
 
-    QGraphicsItem *closestItem;
+    for (int i = 0; i < cItems.size(); ++i) {
+        GraphicsCameraItem *item = dynamic_cast<GraphicsCameraItem *>(cItems[i]);
+        if(item)
+            item->autoDetectStitching();
+    }
+
     if(cItems.size() > 0) {
         qreal x_min = cItems[0]->pos().x() - boundingRect().width();
         qreal x_max = cItems[0]->pos().x() + cItems[0]->boundingRect().width();
         qreal y_min = cItems[0]->pos().y() - boundingRect().height();
         qreal y_max = cItems[0]->pos().y() + cItems[0]->boundingRect().height();
 
-        closestItem = cItems[0];
-
+        QGraphicsItem *closestItem = cItems[0];
         for (int i = 1; i < cItems.size(); ++i) {
-            bool assigned = false;
+            bool flag =false;
             if(cItems[i]->pos().x() - boundingRect().width() < x_min) {
                 x_min = cItems[i]->pos().x() - boundingRect().width();
-                assigned = true;
+                flag = true;
             }
             if(cItems[i]->pos().x() + cItems[i]->boundingRect().width() > x_max) {
                 x_max = cItems[i]->pos().x() + cItems[i]->boundingRect().width();
-                assigned = true;
+                flag = true;
             }
             if(cItems[i]->pos().y() - boundingRect().height() < y_min) {
                 y_min = cItems[i]->pos().y() - boundingRect().height();
-                assigned = true;
+                flag = true;
             }
             if(cItems[i]->pos().y() + cItems[i]->boundingRect().height() > y_max) {
                 y_max = cItems[i]->pos().y() + cItems[i]->boundingRect().height();
-                assigned = true;
+                flag = true;
             }
-            if(assigned)
+            if(flag) {
                 closestItem = cItems[i];
+            }
         }
+
+        // Camera   6 characters
+        int camID0 = name().remove(0, 6).toInt();
+        GraphicsCameraItem *item = static_cast<GraphicsCameraItem *>(closestItem);
+        int camID1 = item->name().remove(0, 6).toInt();
+
+        //! [1] Control to order
+        if(abs(camID0 - camID1) > 1) {
+            setPos(p);
+            return;
+        }
+        //! [1]
 
         QRectF rect(QPointF(x_min, y_min), QPointF(x_max, y_max));
 
@@ -165,51 +170,30 @@ void GraphicsCameraItem::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
             break;
         }
         setPos(p_new);
-
-        addStitchedItem(closestItem);
-        GraphicsCameraItem *temp = static_cast<GraphicsCameraItem *>(closestItem);
-        temp->addStitchedItem(this);
     }
-}
 
-//void GraphicsCameraItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-//{
-//    QList<QGraphicsItem *> items = scene()->items(QRectF(mapToScene(0, 0), mapToScene(CAM_SIZE, CAM_SIZE) ));
-//
-//    foreach (QGraphicsItem *item, items) {
-//
-//        if (item == this)
-//            continue;
-//
-//        QLineF lineToMouse(QPointF(0 + event->pos().x(), 0 + event->pos().y()), mapFromItem(item, 0, 0));
-//        qreal angleToMouse = atan2(lineToMouse.dy(), lineToMouse.dx())*180 / Pi;
-//
-//        qDebug() << "distance to Rect :" << lineToMouse.length();
-//        qDebug() << "angle to Rect    :" << angleToMouse;
-//        qDebug() << "mouse pos        :" << event->pos();
-//
-//        if(lineToMouse.length() <= 140) {
-//            event->accept();
-//            return;
-//        }
-//    }
-//    QGraphicsItem::mouseMoveEvent(event);
-//}
+    // check if item in scene bounds
+    qreal max_x = scene()->width() - boundingRect().width();
+    qreal max_y = scene()->height() - boundingRect().height();
+    if (x() < 0)
+       setPos(0, y());
+    else if (x() > max_x)
+       setPos(max_x, y());
+
+    if (y() < 0)
+       setPos(x(), 0);
+    else if (y() > max_y)
+       setPos(x(), max_y);
+
+}
 
 void GraphicsCameraItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     setOpacity(1);
     QGraphicsItem::mouseReleaseEvent(event);
 
-    QList<QGraphicsItem*> items = collidingItems(Qt::IntersectsItemBoundingRect);
-
-    if(items.size() == 0) {
-        foreach (QGraphicsItem *item0, m_stitched) {
-            GraphicsCameraItem *item = static_cast<GraphicsCameraItem *>(item0);
-            item->removeFromStitchedItem(this);
-        }
-        m_stitched.clear();
-    }
+    // autoDetect sttitched cameras
+    GraphicsCameraItem::updateVideos();
 }
 
 GraphicsCameraItem::BOX_SIDE GraphicsCameraItem::closestSide(const QPointF &p, const QRectF &rect)
@@ -280,14 +264,30 @@ QList<QGraphicsItem *> GraphicsCameraItem::stitched() const
     return m_stitched;
 }
 
-void GraphicsCameraItem::addStitchedItem(QGraphicsItem *item)
+void GraphicsCameraItem::autoDetectStitching()
 {
-    if(!m_stitched.contains(item)) {
-        m_stitched.append(item);
+    QList<QGraphicsItem*> collItems = collidingItems(Qt::IntersectsItemBoundingRect);
+
+    m_stitched.clear();
+    for (int i = 0; i < collItems.size(); ++i) {
+        m_stitched.append(collItems[i]);
     }
 }
 
-void GraphicsCameraItem::removeFromStitchedItem(QGraphicsItem *item)
+void GraphicsCameraItem::updateVideos()
 {
-    m_stitched.removeOne(item);
+    for (int i = 0; i < m_allVideos.size(); ++i) {
+        m_allVideos[i]->autoDetectStitching();
+    }
+
+    if(m_callbackFuncPtr != NULL) {
+        m_callbackFuncPtr(m_callbackObjPtr);
+    }
 }
+
+void GraphicsCameraItem::registerMethod(FunctionPtr ptr, void *p)
+{
+    m_callbackFuncPtr = ptr;
+    m_callbackObjPtr = p;
+}
+

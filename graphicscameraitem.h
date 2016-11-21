@@ -5,6 +5,8 @@
 #include <QPainter>
 #include <QGraphicsSceneDragDropEvent>
 
+typedef void (*FunctionPtr) (void*);
+
 class GraphicsCameraItem : public QGraphicsItem
 {
 public:
@@ -12,30 +14,37 @@ public:
 
     GraphicsCameraItem(QString name);
 
-    QRectF boundingRect() const;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-
+    QString name() const;
     QRectF rect() const;
 
-    QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+    GraphicsCameraItem::BOX_SIDE closestSide(const QPointF &p, const QRectF &rect);
+    qreal distance(const QPointF &p, const QLineF &l);
+
+    QList<QGraphicsItem *> stitched() const;
+
+    void autoDetectStitching();
+    static void updateVideos();
+
+    static void registerMethod(FunctionPtr ptr, void *p);
+
+protected:
+    QRectF boundingRect() const;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 
-    GraphicsCameraItem::BOX_SIDE closestSide(const QPointF &p, const QRectF &rect);
-    qreal distance(const QPointF &p, const QLineF &l);
-
-    QString name() const;
-
-    QList<QGraphicsItem *> stitched() const;
-    void addStitchedItem(QGraphicsItem *item);
-    void removeFromStitchedItem(QGraphicsItem *item);
-
 private:
     QString m_name;
 
     QList<QGraphicsItem *> m_stitched;
+
+    // This allow me  to find reach all cams
+    static QList<GraphicsCameraItem *> m_allVideos;
+
+    static FunctionPtr m_callbackFuncPtr;
+    static void * m_callbackObjPtr;
 };
 
 #endif // GRAPHICSCAMERAITEM_H
