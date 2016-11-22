@@ -33,6 +33,10 @@ public:
 
     void resizeView();
 
+    void parseXML();
+
+    void drawCamerasIntoView();
+
 signals:
     void signalUpdateBoard();
 
@@ -45,15 +49,22 @@ private slots:
 
     void on_pushButtonApply_clicked();
 
+    void on_pushButtonDelete_clicked();
+
+    void on_pushButtonLoad_clicked();
+
 private:
     Ui::CameraStitchingPage *ui;
 
     Scene *m_scene;
+    int m_physicalCamCounter;
 
-    QList<GraphicsCameraItem *> m_cams;
+    QList<GraphicsCameraItem *> m_physicalCams;
 
     // GroupList
     QList<QList<QGraphicsItem *> > groups;
+
+    QList<QList<Camera> > m_allCams;
 };
 
 #endif // CAMERASTITCHINGPAGE_H

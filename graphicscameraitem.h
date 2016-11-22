@@ -7,6 +7,9 @@
 
 typedef void (*FunctionPtr) (void*);
 
+#define CAM_SIZE (140)
+#define CAM_SENSITIVITY (10)
+
 class GraphicsCameraItem : public QGraphicsItem
 {
 public:

@@ -17,7 +17,6 @@ void * GraphicsCameraItem::m_callbackObjPtr = NULL;
 
 static const double Pi = 3.1415926;
 
-#define CAM_SIZE (140)
 
 GraphicsCameraItem::GraphicsCameraItem(QString name) : m_name(name)
 {
@@ -45,6 +44,12 @@ void GraphicsCameraItem::paint(QPainter *painter, const QStyleOptionGraphicsItem
     pen.setWidth(2);
 
     QRectF tRect = rect();
+
+    if(isSelected()) {
+        pen.setColor(Qt::red);
+        pen.setWidth(3);
+    }
+
     painter->setPen(pen);
     painter->setBrush(brush);
     painter->drawRect(tRect);
@@ -80,9 +85,8 @@ void GraphicsCameraItem::paint(QPainter *painter, const QStyleOptionGraphicsItem
 
 QRectF GraphicsCameraItem::rect() const
 {
-    qreal bZone = 5.0;
     QRectF rect = boundingRect();
-    rect -= QMarginsF(bZone, bZone, bZone, bZone);
+    rect -= QMarginsF(CAM_SENSITIVITY, CAM_SENSITIVITY, CAM_SENSITIVITY, CAM_SENSITIVITY);
     return rect;
 }
 
@@ -94,7 +98,7 @@ void GraphicsCameraItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void GraphicsCameraItem::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 {
-    const int minDistanceX = 10;
+    const int minDistanceX = CAM_SENSITIVITY*2;
     const int minDistanceY = 10;
 
     QPointF p = pos();
